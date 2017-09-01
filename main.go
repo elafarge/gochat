@@ -61,7 +61,7 @@ func (h WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.WithField("ctx", "HTTPHandler").
-			Errorln("Error upgrading connection to WebSocket: %v", err)
+			Errorf("Error upgrading connection to WebSocket: %v", err)
 		return
 	}
 	defer conn.Close()
