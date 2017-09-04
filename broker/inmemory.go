@@ -1,14 +1,6 @@
-package main
+package broker
 
 import "fmt"
-
-// Broker represents an abstract broker interface
-type Broker interface {
-	Subscribe(consumer string) (chan []byte, error)
-	HasTopic(consumer string) bool
-	Publish(consumer string, data []byte) error
-	Unsubscribe(consumer string) error
-}
 
 // InMemoryBroker interface implements a simple in-memory Broker using standard Go maps and channels
 type InMemoryBroker struct {
@@ -44,6 +36,7 @@ func (b *InMemoryBroker) Unsubscribe(consumer string) error {
 	if !b.HasTopic(consumer) {
 		return fmt.Errorf("Consumer %s doesn't exist", consumer)
 	}
+	close(b.channels[consumer])
 	delete(b.channels, consumer)
 	return nil
 }

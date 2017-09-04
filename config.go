@@ -1,4 +1,4 @@
-package main
+package gochat
 
 import (
 	"flag"
@@ -6,15 +6,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ChatRelayConf holds all our server config
-type ChatRelayConf struct {
+// Conf holds all our server config
+type Conf struct {
 	ListenOn string
 
 	MaxMsgSize int
 }
 
-// NewChatRelayConfFromFlags parses CLI flags and returns a config object
-func NewChatRelayConfFromFlags() (conf *ChatRelayConf, err error) {
+// NewConfFromFlags parses CLI flags and returns a config object
+func NewConfFromFlags() (conf *Conf, err error) {
 	var (
 		listenOn   string
 		logLevel   string
@@ -33,7 +33,7 @@ func NewChatRelayConfFromFlags() (conf *ChatRelayConf, err error) {
 	}
 	log.SetLevel(level)
 
-	return &ChatRelayConf{
+	return &Conf{
 		ListenOn:   listenOn,
 		MaxMsgSize: maxMsgSize,
 	}, nil
