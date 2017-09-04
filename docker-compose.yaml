@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+  # The frontend
+  gochat-front:
+    image: abiosoft/caddy:latest
+    restart: unless-stopped
+    ports:
+    - 4690:4690
+    volumes:
+    - ./front/Caddyfile:/etc/Caddyfile:ro
+    - ./front:/srv:ro
+    mem_limit: 20000000
+    memswap_limit: 0
+    networks:
+    - dev
+
+  # Our backend
+  gochat:
+    build: ./main
+    restart: unless-stopped
+    command:
+    - -listen-on=0.0.0.0:80
+    - -max-msg-size=1024
+    - -log-level=debug
+    ports:
+    - 4691:80
+    # Let's cap the RAM to 20Mo, that's more than enough
+    mem_limit: 20000000
+    memswap_limit: 0
+    networks:
+    - dev
+
+networks:
+  dev:
+    driver: bridge

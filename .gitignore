@@ -1,6 +1,7 @@
 ## Project
 # Build targets
 gochat
+main/build
 
 ## Golang
 # Binaries for programs and plugins

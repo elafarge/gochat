@@ -72,7 +72,7 @@ func (h WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	conf, err := gochat.NewConfFromFlags()
 	if err != nil {
-		log.Fatalf("Configuration error: %v", err)
+		log.WithField("ctx", "Main").Fatalf("Configuration error: %v", err)
 	}
 
 	handler := WebSocketHandler{
@@ -81,7 +81,7 @@ func main() {
 		broker: broker.NewInMemoryBroker(),
 	}
 
-	log.WithField("ctx", "server-main").Infoln("Starting gochat websocket server")
+	log.WithField("ctx", "Main").Infoln("Starting gochat websocket server on %s", conf.ListenOn)
 	s := http.Server{
 		Addr:    conf.ListenOn,
 		Handler: handler,
@@ -96,6 +96,6 @@ func main() {
 
 	err = s.ListenAndServe()
 	if err != nil {
-		log.WithField("ctx", "server-main").Errorf("Error in server loop: %v", err)
+		log.WithField("ctx", "Main").Errorf("Error in server loop: %v", err)
 	}
 }

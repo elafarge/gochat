@@ -1,6 +1,6 @@
 var username = window.location.hash.substr(1);
 
-var exampleSocket = new WebSocket("ws://localhost:8080/?user=" + username);
+var exampleSocket = new WebSocket("ws://localhost:4691/?user=" + username);
 
 messageList = document.querySelector("#messages > ul");
 recipient = document.getElementById("recipient");

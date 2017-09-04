@@ -1,6 +1,6 @@
-:2017 {
+:4690 {
   root /srv/
 
-  # Use Gzip compression :)
+  # Use Gzip compression
   gzip
 }
