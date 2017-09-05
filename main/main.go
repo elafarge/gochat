@@ -1,12 +1,11 @@
 package main
 
-// TODO handle errors on websocket writes
-
 import (
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/elafarge/gochat"
@@ -51,10 +50,11 @@ func (h WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	relay := &gochat.Relay{
-		Conf:         h.Conf,
-		ConsumerName: consumer,
-		Broker:       h.broker,
-		Conn:         conn,
+		ID:     uuid.NewV4().String(),
+		Conf:   h.Conf,
+		Topic:  consumer,
+		Broker: h.broker,
+		Conn:   conn,
 	}
 
 	// Launch a separate goroutine that forwards messages from the broker to the client

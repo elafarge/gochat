@@ -40,10 +40,11 @@ type Message struct {
 // Relay handles a connection with a given client: it consumes messages targeting this client
 // from a broker and forwards them while registering sent messages against the broker
 type Relay struct {
-	Conf         *Conf
-	ConsumerName string
-	Broker       broker.Broker
-	Conn         *websocket.Conn
+	ID     string
+	Conf   *Conf
+	Topic  string
+	Broker broker.Broker
+	Conn   *websocket.Conn
 
 	// A mutex to ensure only one goroutine writes on our websocket at the time
 	mut sync.Mutex
@@ -54,7 +55,7 @@ func (r *Relay) Log(ctx string) *log.Entry {
 	return log.WithFields(log.Fields{
 		"component": "Relay",
 		"ctx":       ctx,
-		"user":      r.ConsumerName,
+		"user":      r.Topic,
 	})
 }
 
@@ -68,18 +69,22 @@ func (r *Relay) SendToBrowser(message []byte) error {
 // Receive consumes incoming messages from the broker and forwards them
 // to the client through the websocket connection
 func (r *Relay) Receive() {
-	msgChan, err := r.Broker.Subscribe(r.ConsumerName)
+	msgChan, err := r.Broker.Subscribe(r.Topic, r.ID)
 	if err != nil {
 		// It's always good to add some contextxi (tags) to our logs. Would we push them into a log
 		// parsing solution such as logmatic, splunk, or a Elasticsearch-Fluentd-Kibana stack, this
 		// would enable us to see all logs for a given consumer for instance.
-		r.Log("Receive").Errorf("Error listening to incoming messages: %v", err)
+		errMsg := fmt.Sprintf("Error listening to incoming messages: %v", err)
+		r.Log("Receive").Errorf(errMsg)
+		r.SendToBrowser([]byte(fmt.Sprintf("{\"error\": \"%s\"}", errMsg)))
 	}
 
 	// ranging over a channel allows us to have this function exit (and associated goroutine stop)
 	// when close() is called on the channel msgChan
 	for incoming := range msgChan {
-		r.SendToBrowser(incoming)
+		if err := r.SendToBrowser(incoming); err != nil {
+			r.Log("Receive").Errorf("Error sending message to browser: %v", err)
+		}
 	}
 }
 
@@ -135,8 +140,10 @@ func (r *Relay) Send() {
 
 	// Let's unsubscribe from the broker so that it can delete resources allocated to our send/receive
 	// goroutines if needs be
-	err := r.Broker.Unsubscribe(r.ConsumerName)
-	r.Log("Send").Errorf("Error unsubscribing from broker: %v", err)
+	err := r.Broker.Unsubscribe(r.Topic, r.ID)
+	if err != nil {
+		r.Log("Send").Errorf("Error unsubscribing from broker: %v", err)
+	}
 }
 
 // ReadWSMessage reads a websocket message while making sure we don't load more
@@ -177,7 +184,9 @@ func (r *Relay) ReadWSMessage(reader io.Reader) (data []byte, err error) {
 }
 
 func (r *Relay) sendErr(msg string, vars ...interface{}) {
-	msg = fmt.Sprintf(msg, vars)
+	if len(vars) > 0 {
+		msg = fmt.Sprintf(msg, vars)
+	}
 	r.Log("Send").Debugf(msg)
 	r.SendToBrowser([]byte(fmt.Sprintf("{\"error\": \"%s\"}", msg)))
 }
