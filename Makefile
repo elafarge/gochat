@@ -60,7 +60,7 @@ main/build/target: main/*.go broker/*.go *.go vendor
 # 3. And dev.
 dev: main/build/target
 	@echo "Starting dev. env. (ports: front=4690, back=4691)"
-	docker-compose up -d
+	docker-compose up -d --build
 
 devlog:
 	docker-compose logs --follow
