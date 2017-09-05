@@ -6,3 +6,5 @@ import:
   version: ^1.0.3
 - package: github.com/satori/go.uuid
   version: ^v1.1.0
+- package: github.com/valyala/fasthttp
+- package: golang.org/x/net/netutil

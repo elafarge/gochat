@@ -19,14 +19,20 @@ services:
   gochat:
     build: ./main
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 8096
+        hard: 16192
+    environment:
+    - GOMAXPROC=4
     command:
     - -listen-on=0.0.0.0:80
     - -max-msg-size=1024
-    - -log-level=debug
+    - -log-level=warn
     ports:
     - 4691:80
-    # Let's cap the RAM to 20Mo, that's more than enough
-    mem_limit: 20000000
+    # Let's cap the RAM to 2Gi for our load tests
+    mem_limit: 2000000000
     memswap_limit: 0
     networks:
     - dev

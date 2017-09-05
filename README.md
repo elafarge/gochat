@@ -1,5 +1,11 @@
 # Gochat
 
+## Load test results
+
+Ran against our dev. env. (see below) on decent Core-i7 (quad core @2.7GHz):
+ * 1 user, 40000 msg/s (4MiB/s)
+ * 5000 websocket connections in parrallel, 9msg/s (10MiB/s)
+
 ## Getting started
 
 #### Requirements
@@ -45,6 +51,35 @@ Since components are launched in containers, I highly recommand to use [ctop](ht
 #### Tailing logs from the dev. env.
 ```shell
 make devlog
+```
+
+#### Running load tests against the dev. env.
+Under `load-test`, we ship a Go program that can be used to emulate a WebSocket
+client and send/receive messages. First of all, you'll need to issue some sysctl
+commands (as root) to tune the Kernel and get the best out of `gochat`:
+
+```shell
+sysctl -w fs.file-max=11000000
+sysctl -w fs.nr_open=11000000
+ulimit -n 11000000
+sysctl -w net.ipv4.tcp_mem="100000000 100000000 100000000"
+sysctl -w net.core.somaxconn=10000
+sysctl -w net.ipv4.tcp_max_syn_backlog=10000
+sysctl -w fs.file-max=11000000
+sysctl -w fs.nr_open=11000000
+sysctl -w net.ipv4.tcp_mem="100000000 100000000 100000000"
+sysctl -w net.core.somaxconn=10000
+```
+
+You may have to increase the `ulimit` corresponding to the number of opened file
+descriptor that can be opened depending on the amount of Websocket connexions to
+be handled in parrallel.
+
+Now, it's time to build and run the load-testing program:
+
+```shell
+# 1 simultaneous user, send 100 msgs per second to himself
+go build -o lt . && ./lt -user-count 1 -rate 100
 ```
 
 #### Destroying the dev. env.

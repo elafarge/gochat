@@ -83,7 +83,7 @@ func (r *Relay) Receive() {
 	// when close() is called on the channel msgChan
 	for incoming := range msgChan {
 		if err := r.SendToBrowser(incoming); err != nil {
-			r.Log("Receive").Errorf("Error sending message to browser: %v", err)
+			r.Log("Receive").Infof("Error sending message to browser: %v", err)
 		}
 	}
 }
@@ -99,11 +99,6 @@ func (r *Relay) Send() {
 		// Let's get the next reader and handle connection errors accordingly
 		_, reader, err := r.Conn.NextReader()
 		if err != nil {
-			if !websocket.IsCloseError(err, CloseErrors...) {
-				r.Log("Send").Errorf("Error getting next message reader: %v", err)
-				continue
-			}
-			r.Log("Send").Debugf("Close error received: %v", err)
 			break
 		}
 
@@ -114,7 +109,7 @@ func (r *Relay) Send() {
 			// that) when people are trying to DDoS our service
 			r.Log("Send").Debug(err)
 			r.SendToBrowser([]byte(fmt.Sprintf("{\"error\": \"%v\"}", err)))
-			continue
+			break
 		}
 
 		r.Log("Send").Debugf("Received message %s", string(data))
@@ -123,11 +118,6 @@ func (r *Relay) Send() {
 		err = json.Unmarshal(data, &message)
 		if err != nil {
 			r.sendErr("Error unmarshaling message to JSON: %v", err)
-			continue
-		}
-
-		if !r.Broker.HasTopic(message.Recipient) {
-			r.sendErr("Recipient not found")
 			continue
 		}
 

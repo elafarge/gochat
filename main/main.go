@@ -14,8 +14,8 @@ import (
 
 // Upgrader configuration
 var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  512,
-	WriteBufferSize: 512,
+	ReadBufferSize:  1 * 1024,
+	WriteBufferSize: 1 * 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
@@ -38,7 +38,11 @@ func (h WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Errorf("Error upgrading connection to WebSocket: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
 
 	consumer := r.FormValue("user")
 	if len(consumer) == 0 {
@@ -81,7 +85,7 @@ func main() {
 		broker: broker.NewInMemoryBroker(),
 	}
 
-	log.WithField("ctx", "Main").Infoln("Starting gochat websocket server on %s", conf.ListenOn)
+	log.WithField("ctx", "Main").Infof("Starting gochat websocket server on %s", conf.ListenOn)
 	s := http.Server{
 		Addr:    conf.ListenOn,
 		Handler: handler,
@@ -93,6 +97,10 @@ func main() {
 		MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
 	}
 	defer s.Close()
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	err = s.ListenAndServe()
 	if err != nil {

@@ -1,5 +1,5 @@
-hash: 7fea572c8d9ee63a39d65e216eb5fcf6a6a817c79ec756affaaed66d99602a75
-updated: 2017-09-04T23:57:16.120158332Z
+hash: da7c9ae78c541a51688c71a36cb05d688dfc6616b80a2f7fab9c289facc82f9d
+updated: 2017-09-05T02:23:45.187217836Z
 imports:
 - name: github.com/gorilla/websocket
   version: ea4d1f681babbce9545c9c5f3d5194a789c89f5b
@@ -7,6 +7,8 @@ imports:
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/sirupsen/logrus
   version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+- name: github.com/valyala/fasthttp
+  version: b43f17d9a9aa1e39f2614f49c8fa4fe8f406c83d
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
