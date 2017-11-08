@@ -77,4 +77,4 @@ browser, as a static file (it lives under `./front`).
 
 Author
 ------
- * Étienne Lafarge <etienne.lafarge _at_ gmail.com>
+ * Étienne Lafarge <etienne.lafarge _at_ gmail.com> (see my GPG key)
